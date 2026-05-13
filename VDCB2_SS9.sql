@@ -1,52 +1,45 @@
+CREATE DATABASE IF NOT EXISTS hospital_db;
 
-CREATE TABLE Patients (
-    Patient_ID INT PRIMARY KEY,
-    Full_Name VARCHAR(100),
-    Age INT,
-    Room_Number INT,
-    HIV_Status VARCHAR(50),
-    Mental_Health_History VARCHAR(255)
+USE hospital_db;
+
+DROP TABLE IF EXISTS patients;
+
+CREATE TABLE patients (
+    id int PRIMARY KEY AUTO_INCREMENT,
+    full_name varchar(255) NOT NULL,
+    phone varchar(20) NOT NULL,
+    age int,
+    address varchar(255)
 );
 
+DELIMITER //
+CREATE PROCEDURE seedPatients ()
+BEGIN
+DECLARE
+    i int DEFAULT 1;
+    START TRANSACTION;
+    WHILE i <= 500000 DO INSERT INTO patients (full_name, phone, age, address)
+        VALUES (CONCAT('Patient ', i), CONCAT('090', i), FLOOR(RAND () * 100), 'Ho Chi Minh City');
+    SET i = i + 1;
+END WHILE;
+    COMMIT;
+END //
+DELIMITER ;
+CALL seedPatients ();
 
-INSERT INTO Patients 
-(Patient_ID, Full_Name, Age, Room_Number, HIV_Status, Mental_Health_History)
-VALUES
-(1, 'Minh Thu', 30, 101, 'Negative', 'None'),
-(2, 'Hông Vân', 40, 102, 'Positive', 'Anxiety'),
-(3, 'Cao Cường', 25, 103, 'Negative', 'None');
-
-
-
-CREATE VIEW Reception_Patient_View AS
+EXPLAIN
+SELECT
+		*
+FROM
+		patients
+WHERE
+		phone = '090400000';
+    
 SELECT 
-    Patient_ID,
-    Full_Name,
-    Age,
-    Room_Number
-FROM Patients
-WHERE Age >= 0
-WITH CHECK OPTION;
-
-
-
-
-SELECT * 
-FROM Reception_Patient_View;
-
-
-
-UPDATE Reception_Patient_View
-SET Age = 35
-WHERE Patient_ID = 1;
-
-
-
-SELECT * 
-FROM Reception_Patient_View;
-
-
-
-UPDATE Reception_Patient_View
-SET Age = -5
-WHERE Patient_ID = 2;
+    *
+FROM
+    patients
+WHERE
+    phone = '090400000';
+    
+CREATE INDEX idx_patients_phone ON patients (phone);
